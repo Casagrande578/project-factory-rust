@@ -1,7 +1,6 @@
 use ::serde::{Deserialize, Serialize};
-use sqlx::types::Uuid as SqlxUuid;
-use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateTeamRequest {
@@ -15,7 +14,6 @@ pub struct CreateUserRequest {
     pub azure_id: Option<String>,
     pub name: Option<String>,
     pub email: Option<String>,
-    pub team_id: Option<Uuid>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
