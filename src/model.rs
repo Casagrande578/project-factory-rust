@@ -10,10 +10,27 @@ pub struct Team {
     pub name: String,
     pub description: Option<String>,
     // Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub projects: Option<Vec<Project>>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub projects: Option<Vec<Project>>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub users: Option<Vec<User>>,
+}
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TeamResponse {
+    pub id: Uuid,
+    pub azure_id: Option<String>,
+    pub name: String,
+    pub description: Option<String>,
+    // Relationships
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub projects: Option<Vec<Project>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub users: Option<Vec<User>>,
+}
+
+pub struct TeamUser {
+    pub team_id: Uuid,
+    pub user_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow)]

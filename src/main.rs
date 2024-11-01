@@ -1,11 +1,12 @@
 mod model;
+mod routes;
 mod schema;
-mod services;
+mod team_services;
+mod user_services;
 
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-
 pub struct AppState {
     db: Pool<Postgres>,
 }
@@ -35,7 +36,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(AppState { db: pool.clone() }))
-            .configure(services::config)
+            .configure(routes::configure_routes)
     })
     .bind("127.0.0.1:8080")?
     .run()

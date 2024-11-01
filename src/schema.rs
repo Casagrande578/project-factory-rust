@@ -7,6 +7,7 @@ pub struct CreateTeamRequest {
     pub azure_id: Option<String>,
     pub name: String,
     pub description: Option<String>,
+    pub user_ids: Vec<Uuid>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -55,8 +56,8 @@ pub struct CreateNotificationRequest {
     pub message: Option<String>,
 }
 
-#[derive(Serialize,Deserialize,Debug)]
-pub struct FilterOptions{
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FilterOptions {
     pub page: Option<i32>,
     pub limit: Option<i32>,
     pub name: Option<String>,

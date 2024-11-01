@@ -60,61 +60,29 @@ async fn create_user(body: Json<CreateUserRequest>, data: Data<AppState>) -> imp
 async fn get_all_users(opts: Query<FilterOptions>, data: Data<AppState>) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
-    
-    // Start building the base query
-    let mut query = String::from("SELECT * FROM users");
-    let mut conditions = Vec::new();
-    let mut args = PgArguments::default();
-    let mut param_count = 1;
 
-    // Add filter conditions dynamically
-    if let Some(name) = &opts.name {
-        conditions.push(format!("name ILIKE ${}", param_count));
-        args.add(format!("%{}%", name));
-        param_count += 1;
-    }
-
-    if let Some(email) = &opts.email {
-        conditions.push(format!("email ILIKE ${}", param_count));
-        args.add(format!("%{}%", email));
-        param_count += 1;
-    }
-
-    // Add WHERE clause if there are any conditions
-    if !conditions.is_empty() {
-        query.push_str(" WHERE ");
-        query.push_str(&conditions.join(" AND "));
-    }
-
-    // Add ORDER BY, LIMIT, and OFFSET
-    query.push_str(" ORDER BY id");
-    query.push_str(&format!(" LIMIT ${}", param_count));
-    args.add(limit as i32);
-    param_count += 1;
-
-    query.push_str(&format!(" OFFSET ${}", param_count));
-    args.add(offset as i32);
-
-    // Execute the query with dynamic conditions
-    match sqlx::query_as_with::<Postgres, User, _>(&query, args)
-        .fetch_all(&data.db)
-        .await
+    match sqlx::query_as!(
+        User,
+        "SELECT * FROM users ORDER by id LIMIT $1 OFFSET $2",
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&data.db)
+    .await
     {
         Ok(users) => {
             let json_response = json!({
-                "status": "success",
+                "status":"success",
                 "result": users.len(),
-                "users": users,
-                "page": opts.page.unwrap_or(1),
-                "limit": limit
+                "users": users
             });
-            HttpResponse::Ok().json(json_response)
+            return HttpResponse::Ok().json(json_response);
         }
         Err(error) => {
-            HttpResponse::InternalServerError().json(json!({
-                "status": "error",
-                "message": format!("{:?}", error)
-            }))
+            return HttpResponse::InternalServerError().json(json!({
+                "status":"error",
+                "message": format!("{:?}",error)
+            }));
         }
     }
 }
@@ -208,14 +176,3 @@ async fn update_user_by_id(
     }
 }
 
-pub fn config(conf: &mut ServiceConfig) {
-    let scope = scope("/api")
-        .service(health_check)
-        .service(create_user)
-        .service(get_all_users)
-        .service(get_user_by_id)
-        .service(delete_user)
-        .service(update_user_by_id);
-
-    conf.service(scope);
-}
