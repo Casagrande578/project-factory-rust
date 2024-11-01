@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -15,7 +16,7 @@ pub struct Team {
     pub users: Option<Vec<User>>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct User {
     pub id: Uuid,
     pub azure_id: Option<String>,
@@ -40,7 +41,6 @@ pub struct User {
     // #[serde(default)]
     // pub notifications_sent: Option<Vec<Notification>>,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Project {

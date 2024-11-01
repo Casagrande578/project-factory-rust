@@ -57,6 +57,8 @@ pub struct CreateNotificationRequest {
 
 #[derive(Serialize,Deserialize,Debug)]
 pub struct FilterOptions{
-    pub page: Option<usize>,
-    pub limit: Option<usize>
+    pub page: Option<i32>,
+    pub limit: Option<i32>,
+    pub name: Option<String>,
+    pub email: Option<String>,
 }
