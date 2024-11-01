@@ -54,3 +54,9 @@ pub struct CreateNotificationRequest {
     pub receiver_id: Uuid,
     pub message: Option<String>,
 }
+
+#[derive(Serialize,Deserialize,Debug)]
+pub struct FilterOptions{
+    pub page: Option<usize>,
+    pub limit: Option<usize>
+}
