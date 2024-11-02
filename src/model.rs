@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
@@ -80,26 +80,26 @@ pub struct WorkItem {
     pub id: Uuid,
     pub azure_id: Option<String>,
     pub title: String,
-    pub type_: String, // Using type_ because 'type' is a reserved word
+    pub w_type: String, // Using type_ because 'type' is a reserved word
     pub state: String,
-    pub project: Uuid,
-    pub assigned_to_id: Option<Uuid>,
-    pub created_by_id: Uuid,
-    pub created_date: DateTime<Utc>,
-    pub changed_date: Option<DateTime<Utc>>,
+    pub project: Uuid, //project id
+    pub assigned_to_id: Option<Uuid>, //assigned user id 
+    pub created_by_id: Uuid, // created by user id 
+    pub created_date: NaiveDateTime,
+    pub changed_date: Option<NaiveDateTime>,
     pub priority: Option<i32>,
     pub severity: Option<String>,
     pub description: Option<String>,
     pub area_path: Option<String>,
     pub iteration_path: Option<String>,
-    pub parent_id: Option<Uuid>,
+    pub parent_id: Option<Uuid>, // parent workitem id
     pub tags: Option<Vec<String>>,
     pub url: String,
     // Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub assigned_to: Option<User>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub created_by: Option<User>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub assigned_to: Option<User>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub created_by: Option<User>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

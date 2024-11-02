@@ -4,6 +4,7 @@ mod schema;
 mod team_services;
 mod user_services;
 mod projects_services;
+mod workitems_services;
 
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
