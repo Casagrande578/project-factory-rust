@@ -1,13 +1,10 @@
 use actix_web::{
-    body, delete, get, patch, post,
-    web::{scope, Data, Json, Path, Query, ServiceConfig},
+    get, post,
+    web::{Data, Json, Query},
     HttpResponse, Responder,
 };
 
 use serde_json::json;
-use uuid::Uuid;
-
-use sqlx::{postgres::PgArguments, Arguments, Postgres};
 
 use crate::{
     model::{Team, TeamResponse, User},

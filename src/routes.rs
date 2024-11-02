@@ -1,4 +1,4 @@
-use crate::{team_services, user_services};
+use crate::{team_services, user_services,projects_services};
 use actix_web::web::{scope, ServiceConfig};
 
 pub fn configure_routes(conf: &mut ServiceConfig) {
@@ -10,7 +10,9 @@ pub fn configure_routes(conf: &mut ServiceConfig) {
         .service(user_services::delete_user)
         .service(user_services::update_user_by_id)
         .service(team_services::create_team)
-        .service(team_services::get_all_teams);
+        .service(team_services::get_all_teams)
+        .service(projects_services::create_project)
+        .service(projects_services::get_all_projects);
 
     conf.service(scope);
 }

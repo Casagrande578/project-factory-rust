@@ -59,20 +59,20 @@ pub struct User {
     // pub notifications_sent: Option<Vec<Notification>>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Project {
+#[derive(Debug, Serialize, Deserialize, Clone,FromRow)]
+pub struct ProjectModel {
     pub id: Uuid,
     pub azure_id: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
     pub url: Option<String>,
     pub template: Option<String>,
-    pub begin_date: Option<DateTime<Utc>>,
-    pub end_date: Option<DateTime<Utc>>,
+    // pub begin_date: Option<DateTime<Utc>>,
+    // pub end_date: Option<DateTime<Utc>>,
     pub team_id: Option<Uuid>,
     // Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub team: Option<Team>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub team: Option<Team>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
