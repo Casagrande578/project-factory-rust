@@ -4,6 +4,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
+use log::{info,error};
 use serde_json::json;
 
 use crate::{
@@ -24,11 +25,12 @@ async fn create_team(body: Json<CreateTeamRequest>, data: Data<AppState>) -> imp
             }));
         }
     };
+    info!("{:?}", &body.user_ids[..]);
     //find team members
     let users = match sqlx::query_as!(
         User,
-        "SELECT * FROM users WHERE id = ANY($1::uuid[])",
-        &body.user_ids[..]
+        "SELECT * FROM users WHERE azure_id = ANY($1::varchar[])",
+        &body.user_ids
     )
     .fetch_all(&mut tx)
     .await
@@ -43,6 +45,7 @@ async fn create_team(body: Json<CreateTeamRequest>, data: Data<AppState>) -> imp
             users
         }
         Err(error) => {
+            error!("{}", error);
             return HttpResponse::InternalServerError().json(json!({
                 "status":"error",
                 "message": format!("{:?}",error)
@@ -70,11 +73,11 @@ async fn create_team(body: Json<CreateTeamRequest>, data: Data<AppState>) -> imp
         }
     };
 
-    for user_id in &body.user_ids {
+    for user in &users {
         if let Err(e) = sqlx::query!(
             "INSERT INTO team_users (team_id, user_id) VALUES ($1,$2)",
             team.id,
-            user_id
+            user.id
         )
         .execute(&mut tx)
         .await

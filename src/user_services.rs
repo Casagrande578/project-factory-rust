@@ -7,6 +7,8 @@ use actix_web::{
 use serde_json::json;
 use uuid::Uuid;
 
+use log::{error, info};
+
 use sqlx::{postgres::PgArguments, Arguments, Postgres};
 
 use crate::{
@@ -48,6 +50,7 @@ async fn create_user(body: Json<CreateUserRequest>, data: Data<AppState>) -> imp
             return HttpResponse::Ok().json(note_response);
         }
         Err(error) => {
+            println!("Entrou no erro");
             return HttpResponse::InternalServerError().json(json!({
                 "status":"error",
                 "message": format!("{:?}",error)
@@ -145,8 +148,12 @@ async fn update_user_by_id(
             match sqlx::query_as!(
                 User,
                 "UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *",
-                body.name.to_owned().unwrap_or(user.name.expect("No info for user")),
-                body.email.to_owned().unwrap_or(user.email.expect("No info for user")),
+                body.name
+                    .to_owned()
+                    .unwrap_or(user.name.expect("No info for user")),
+                body.email
+                    .to_owned()
+                    .unwrap_or(user.email.expect("No info for user")),
                 user_id
             )
             .fetch_one(&data.db)
@@ -175,4 +182,3 @@ async fn update_user_by_id(
         }
     }
 }
-

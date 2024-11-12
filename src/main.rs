@@ -6,7 +6,7 @@ mod user_services;
 mod projects_services;
 mod workitems_services;
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 pub struct AppState {
@@ -16,7 +16,7 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("=== PROJECT-FACTORY : RUNNING ===");
-
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     dotenv().ok();
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must not be null");
@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(AppState { db: pool.clone() }))
             .configure(routes::configure_routes)
+            .wrap(Logger::default())
     })
     .bind("127.0.0.1:8080")?
     .run()

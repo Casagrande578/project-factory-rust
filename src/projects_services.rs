@@ -23,29 +23,28 @@ async fn create_project(body: Json<CreateProjectRequest>, data: Data<AppState>) 
         }
     };
 
-    let team = match sqlx::query_as!(Team, "SELECT * FROM teams WHERE id = $1", body.team_id)
-        .fetch_one(&mut tx)
-        .await
-    {
-        Ok(team) => team,
-        Err(error) => {
-            return HttpResponse::InternalServerError().json(json!({
-                "status":"error",
-                "message": format!("{:?}",error)
-            }));
-        }
-    };
+    // let team = match sqlx::query_as!(Team, "SELECT * FROM teams WHERE id = $1", body.team_id)
+    //     .fetch_one(&mut tx)
+    //     .await
+    // {
+    //     Ok(team) => team,
+    //     Err(error) => {
+    //         return HttpResponse::InternalServerError().json(json!({
+    //             "status":"error",
+    //             "message": format!("{:?}",error)
+    //         }));
+    //     }
+    // };
 
     //insert project
     let project = match sqlx::query_as!(
         ProjectModel,
-        "INSERT INTO projects (azure_id, name, description, url, template,team_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+        "INSERT INTO projects (azure_id, name, description, url, template) VALUES ($1,$2,$3,$4,$5) RETURNING *",
         body.azure_id,
         body.name,
         body.description,
         body.url,
-        body.template,
-        team.id
+        body.template
     ).fetch_one(&mut tx)
     .await{
         Ok(project)=> project,
@@ -71,7 +70,7 @@ async fn create_project(body: Json<CreateProjectRequest>, data: Data<AppState>) 
         description: project.description,
         url: project.url,
         template: project.template,
-        team_id: Some(team.id),
+        team_id: None,
     };
 
     HttpResponse::Ok().json(json!({"status":"success","project":project_response}))

@@ -1,5 +1,5 @@
 use ::serde::{Deserialize, Serialize};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -7,7 +7,7 @@ pub struct CreateTeamRequest {
     pub azure_id: Option<String>,
     pub name: String,
     pub description: Option<String>,
-    pub user_ids: Vec<Uuid>,
+    pub user_ids: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

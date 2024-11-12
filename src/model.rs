@@ -85,7 +85,7 @@ pub struct WorkItem {
     pub project: Uuid, //project id
     pub assigned_to_id: Option<Uuid>, //assigned user id 
     pub created_by_id: Uuid, // created by user id 
-    pub created_date: NaiveDateTime,
+    pub created_date: Option<NaiveDateTime>,
     pub changed_date: Option<NaiveDateTime>,
     pub priority: Option<i32>,
     pub severity: Option<String>,

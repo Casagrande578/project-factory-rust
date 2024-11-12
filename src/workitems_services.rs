@@ -3,6 +3,9 @@ use actix_web::{
     web::{Data, Json, Query},
     HttpResponse, Responder,
 };
+use chrono::offset;
+
+use log::{error, info};
 
 use crate::{
     model::{ProjectModel, Team, User, WorkItem},
@@ -17,17 +20,17 @@ async fn create_workitem(
     data: Data<AppState>,
 ) -> impl Responder {
     //begin transaction
+    println!("{:?}", body.azure_id);
     let mut tx = match data.db.begin().await {
         Ok(tx) => tx,
         Err(error) => {
             return HttpResponse::InternalServerError().json(json!({"status":"error", "message": format!("Failed to begin transaction: {}",error)}));
         }
     };
-
     //find relations
     let project = match sqlx::query_as!(
         ProjectModel,
-        "SELECT * FROM projects WHERE azure_id = $1",
+        "SELECT * FROM projects WHERE name = $1",
         body.project
     )
     .fetch_one(&mut tx)
@@ -35,6 +38,7 @@ async fn create_workitem(
     {
         Ok(project) => project,
         Err(error) => {
+            error!("Failed here on fiding project");
             return HttpResponse::InternalServerError()
                 .json(json!({"status":"error", "message": format!("{:?}",error)}));
         }
@@ -50,6 +54,7 @@ async fn create_workitem(
     {
         Ok(user) => user,
         Err(error) => {
+            error!("failed to find user: {:?}", body.assigned_to_id);
             return HttpResponse::InternalServerError()
                 .json(json!({"status":"error", "message": format!("{:?}",error)}));
         }
@@ -57,7 +62,7 @@ async fn create_workitem(
 
     let created_by_user = match sqlx::query_as!(
         User,
-        "SELECT * FROM users WHERE azure_id = $1",
+        "SELECT * FROM users WHERE email = $1",
         body.created_by_id
     )
     .fetch_one(&mut tx)
@@ -65,6 +70,7 @@ async fn create_workitem(
     {
         Ok(user) => user,
         Err(error) => {
+            error!("Failed to find creation user: {:?}", body.created_by_id);
             return HttpResponse::InternalServerError()
                 .json(json!({"status":"error", "message": format!("{:?}",error)}));
         }
@@ -79,7 +85,6 @@ async fn create_workitem(
     .await
     .ok()
     .flatten();
-
     match parent_workitem {
         Some(parent) => {
             let workitem = match sqlx::query_as!(WorkItem,"INSERT INTO work_items (azure_id, title, w_type, state, project,assigned_to_id,created_by_id,priority, 
@@ -157,5 +162,33 @@ async fn create_workitem(
     }
 }
 
-// #[get("/workitem")]
-// async fn get_all_workitem()->impl Responder{}
+#[get("/workitem")]
+async fn get_all_workitem(opts: Query<FilterOptions>, data: Data<AppState>) -> impl Responder {
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    match sqlx::query_as!(
+        WorkItem,
+        "SELECT * FROM work_items ORDER by id LIMIT $1 OFFSET $2",
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&data.db)
+    .await
+    {
+        Ok(wi) => {
+            let json_response = json!({
+                "status":"success",
+                "result":wi.len(),
+                "workitems":wi
+            });
+            return HttpResponse::Ok().json(json_response);
+        }
+        Err(error) => {
+            return HttpResponse::InternalServerError().json(json!({
+                "status":"error",
+                "message": format!("{:?}",error)
+            }));
+        }
+    }
+}
