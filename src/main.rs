@@ -37,7 +37,7 @@ async fn main() -> std::io::Result<()> {
     };
 
     let cors = Cors::default()
-    .allowed_origin('*')
+    .allowed_origin("*")
     .allowed_methods(vec!["GET","POST"]);
 
     HttpServer::new(move || {
