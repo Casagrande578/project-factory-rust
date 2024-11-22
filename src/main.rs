@@ -6,6 +6,7 @@ mod user_services;
 mod projects_services;
 mod workitems_services;
 
+use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
@@ -34,6 +35,10 @@ async fn main() -> std::io::Result<()> {
             std::process::exit(1);
         }
     };
+
+    let cors = Cors::default()
+    .allowed_origin('*')
+    .allowed_methods(vec!["GET","POST"]);
 
     HttpServer::new(move || {
         App::new()
